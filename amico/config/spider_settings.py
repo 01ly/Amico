@@ -17,7 +17,10 @@ MIDDLEWARE_TO_INSTALL = {
     'response':
     {
         # 'amico.middlewares.responsewares.decode':1000,
-
+    },
+    'both':
+    {
+        'amico.middlewares.CrawlFilter' : 900,
     }
 }
 

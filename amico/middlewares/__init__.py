@@ -2,7 +2,7 @@
 from functools import wraps
 from amico.BaseClass import Middleware
 from amico.cmd import _iter_specify_classes
-from amico.exceptions import DropRequest
+from amico.exceptions import DropRequest,DropResponse
 
 class MiddleWareManager(object):
 
@@ -22,6 +22,8 @@ class MiddleWareManager(object):
             self.mw[spider.name] = spider.settings.MIDDLEWARE_TO_INSTALL
             _req_mw[spider.name] = self.mw[spider.name]['request']
             _resp_mw[spider.name] = self.mw[spider.name]['response']
+            _req_mw[spider.name].update(self.mw[spider.name]['both'])
+            _resp_mw[spider.name].update(self.mw[spider.name]['both'])
 
         def _load( name_dict):
             mws = {}
@@ -47,15 +49,42 @@ class MiddleWareManager(object):
         return request
 
     @classmethod
+    def _process_response(cls,future):
+        response = future.result()
+        if response.status == 200:
+            for i in cls.resp_mw[response.spider.name]:
+                try:
+                    response = i.process_response(response)
+                except DropResponse:
+                    return None
+        return response
+
+    @classmethod
     def handle_req(cls,func):
         @wraps(func)
         def wrap(_self,requests,*args,**kwargs):
             _r = []
             if not any(requests):return None
             for req in sorted(requests,key=lambda x:-x.priority):
+                if req._ignore:
+                    _r.append(req)
+                    continue
                 request = cls._process_request(req)
-                _r.append(request)
+                if isinstance(request,list):
+                    _r.extend(request)
+                else:
+                    _r.append(request)
             if not any(_r):return None
             requests = [i for i in _r if i]
             return func(_self,requests,*args,**kwargs)
+        return wrap
+
+    @classmethod
+    def handle_resp(cls,func):
+        @wraps(func)
+        def wrap(_self, future, *args, **kwargs):
+            response = cls._process_response(future)
+            if response is None:
+                return
+            return func(_self, response, *args, **kwargs)
         return wrap

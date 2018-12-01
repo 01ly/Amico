@@ -5,10 +5,10 @@
     date   : 2018-11-15
 '''
 import amico
-import asyncio
 import logging
-from amico.datatype import Sdict
 from amico.BaseClass import Hub
+from amico.middlewares import MiddleWareManager
+from amico.util.filter import _to_feature
 
 logger = logging.getLogger('amico')
 
@@ -26,7 +26,6 @@ class SpiderHub(Hub):
         self._failed_counter = 0
         self._exception_counter = 0
         self.active = False
-        self._paused_spiders = Sdict()
         self._crawler = crawler
 
     def _gen_start_requests(self,looper):
@@ -43,22 +42,6 @@ class SpiderHub(Hub):
             print('*[End] No seed urls to start the spiders.')
             sys.exit(0)
 
-    def _check_all_spider(self):
-        _reqs = []
-        for spider in self.spiders:
-            if spider.status == 'RESUME':
-                _reqs.extend(self._paused_spiders.pop(spider.name))
-                spider.status = 'RUNNING'
-        return _reqs
-
-    def _check(self,request):
-        spider = request.spider
-        if spider.status == 'PAUSE':
-            self._paused_spiders.add(request, spider)
-            return
-        elif spider.status == 'RUNNING':
-            return request
-
     def takeover(self,spiders):
         self.spiders =spiders
         logger.info('Take:%s'%spiders)
@@ -71,17 +54,13 @@ class SpiderHub(Hub):
                 if not isinstance(req, amico.Request):
                    continue
                 else:
-                    _r = self._check(req)
-                    if _r:
-                        _all_req.append(_r)
+                    _all_req.append(req)
         elif isinstance(request,amico.Request):
-            _r = self._check(request)
-            if _r:
-                _all_req.append(_r)
+            _all_req.append(request)
         return _all_req
 
-    def delegate(self,future):
-        response = future.result()
+    @MiddleWareManager.handle_resp
+    def delegate(self,response):
         _res = []
         if response.status == 200:
             self._success_counter += 1
@@ -90,13 +69,14 @@ class SpiderHub(Hub):
         elif response.status == -1:
             self._exception_counter += 1
             response.spider._exc +=1
+            response.spider.urlfilter.delete(_to_feature(response.request))
             a = self.accept(response.excback(response))
         else:
             self._failed_counter += 1
             response.spider._fail += 1
+            response.spider.urlfilter.delete(_to_feature(response.request))
             a = self.accept(response.errback(response))
         _res.extend(a)
-        _res.extend(self._check_all_spider())
         self._crawler.convert(_res)
 
     def __str__(self):

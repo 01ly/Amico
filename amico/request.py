@@ -21,7 +21,8 @@ class Request(object):
                  down_type=None,
                  encoding='utf-8',
                  method='GET',
-                 filter=False,
+                 filter=None,
+                 fingerprint=None,
                  retry=0,
                  priority=0,
                  delay = 0,
@@ -61,11 +62,13 @@ class Request(object):
         self.excback = excback
         self.encoding = encoding
         self.priority = priority
-        self.filter  = filter
         self.method = method
         self.data = data
         self.params = params
-
+        self.fingerprint = fingerprint
+        self._ignore = False
+        self.filter  = bool(filter) if filter != None \
+            else spider.settings.FILTER_URL_TAKE
         self.kwargs_cb = {} if not kwargs_cb \
             else kwargs_cb
         self.down_type = down_type if down_type\
@@ -109,7 +112,7 @@ class Request(object):
     def url(self,url):
         #only starts with schema:file,http,https allowed to be a valid url
         if not urltool.is_url(url):
-            raise ValueError('Not a valid url for Request.')
+            raise ValueError('Not a valid url for Request.Got:%s'%url)
         else:
             self.__url = urltool.safe_download_url(url)
 

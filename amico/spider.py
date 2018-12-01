@@ -6,6 +6,7 @@
 '''
 import amico
 import aiohttp
+from amico.util.filter import _generate_filter
 from amico.core.spiderhub import SpiderHub
 from amico.BaseClass import BaseSpider
 
@@ -17,6 +18,8 @@ class Spider(BaseSpider):
         self.requests = []
         self.session = None
         self._load_settings()
+        self.urlfilter = _generate_filter(self.settings)
+        self.respfilter =  _generate_filter(self.settings)
         self.conn = aiohttp.TCPConnector(limit=self.settings.CONCURRENCY)
         self.session = aiohttp.ClientSession(connector=self.conn)
 
@@ -27,7 +30,16 @@ class Spider(BaseSpider):
 
     async def _generate_seed_requests(self):
         self.status = 'RUNNING'
-        return [amico.Request(self,url) for url in self.urls]
+        _req = self.start_requests()
+        return _req
+
+    def start_requests(self):
+        _starts = []
+        for url in self.urls:
+            a = amico.Request(self, url)
+            a._ignore = True
+            _starts.append(a)
+        return _starts
 
     def _load_settings(self):
         from inspect import ismodule
@@ -42,10 +54,17 @@ class Spider(BaseSpider):
         if not isinstance(request, amico.Request):
             raise TypeError(f'not a valid Request to send,'
                             f'got "{type(request).__name__}".')
-        if self.binding_hub is None:
-            raise RuntimeError('Spider "%s" has no binding SpiderHub.'%self.name)
         if not isinstance(self.binding_hub,SpiderHub):
             raise TypeError('Not a valid binging SpiderHub for Spider %s,got "%s".'
                             %(self.name, type(self.binding_hub).__name__))
         _a = self.binding_hub.accept(request)
         self.binding_hub._crawler.convert(_a)
+
+    async def resume(self):
+        _resume = []
+        self.status = 'RUNNING'
+        if any(self._hanged):
+            _resume.extend(self._hanged)
+        else:
+            _resume.extend([amico.Request(self,url) for url in self.urls])
+        self.binding_hub._crawler.convert(_resume)

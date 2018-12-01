@@ -1,2 +1,2 @@
-python37 test.py
+python test.py
 pause

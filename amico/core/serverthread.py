@@ -17,8 +17,7 @@ class SpiderServer(Thread):
         self.tool_module = settings['project'].SPIDER_SERVER_COMMANDS_MODULE
         self.setDaemon(True)
         self.prompt = b"""* Spider-Client commands tool:
-        \r\n* use "help" to see all the commands usage.
-        """
+                    \r\n* use "help" to see all the commands usage."""
 
     async def _handle_request(self,reader:asyncio.StreamReader,writer:asyncio.StreamWriter):
         writer.write(self.prompt)
@@ -36,6 +35,12 @@ class SpiderServer(Thread):
                     return
                 elif msg:
                     resp = self.parse_opt(msg)
+                    if '[resume]' in resp:
+                        _name = resp.split(',')[-1]
+                        for i in self.spiders:
+                            if i.name == _name:
+                                await i.resume()
+                                resp = f'* Spider {i.name} resumed at {i._resume_at} successfully.'
                     print(f'*[Server] {time.ctime()} Received "{msg}" from {_c}.')
                     writer.write(resp.encode('latin-1'))
             except Exception as e:

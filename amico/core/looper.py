@@ -5,10 +5,8 @@
     date   : 2018-11-17
 '''
 
-import asyncio,sys
+import asyncio
 from inspect import iscoroutine
-from concurrent.futures import ThreadPoolExecutor as Executor
-
 
 class Looper(object):
     def __init__(self):

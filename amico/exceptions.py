@@ -23,6 +23,9 @@ class NotValidJsonContent(Exception):
 class DropRequest(Exception):
     '''the Request needs to ignore,then drop it'''
 
+class DropResponse(Exception):
+    '''the Response needs to ignore,then drop it'''
+
 class Forbidden(Exception):
     '''Amico forbidden options.'''
 

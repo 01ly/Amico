@@ -7,6 +7,7 @@
 
 import amico
 import json
+import aiohttp
 import w3lib.url as urltool
 from amico.exceptions import NotValidJsonContent
 
@@ -21,16 +22,20 @@ class mdict(dict):
 
 class Response(object):
     def __init__(self,url,
-                 status=200,
+                 status=None,
                  headers=None,
                  request=None,
                  priority=0,
                  encoding='utf-8',
                  body=None,
                  exc = None,
-                 filter=False,
-                 cookies=None
+                 cookies=None,
+                 _resp=None
                  ):
+
+        assert isinstance(_resp,aiohttp.ClientResponse) or _resp is None,\
+            f'_resp of a Response must be a aiohttp.ClientResponse,' \
+            f'got {type(_resp).__name__}.'
 
         assert isinstance(request,amico.Request),\
             'not a valid Request for Response,got "%s".'%type(request).__name__
@@ -40,19 +45,33 @@ class Response(object):
                 raise TypeError('Not an valid Exception for Response,got "%s".'
                                 % type(exc).__name__)
 
-        self.headers = headers
         self.cookies = cookies
-        self.status = status
         self.request = request
         self.spider = request.spider
         self.callback = request.callback
         self.errback = request.errback
         self.excback = request.excback
-        self.encoding = encoding
         self.priority = priority
-        self.filter  = filter
         self._body = body
         self.exception = exc
+        self.resp = _resp
+
+        self.msg = _resp.reason if _resp else None
+        self.headers = _resp.headers if _resp and headers is None else headers
+        self.content_type = _resp.content_type if _resp else None
+        self.history = _resp.history if _resp else None
+        self.encoding = _resp.charset  if _resp else encoding
+        self._cookies = _resp.cookies if _resp else None
+        self.status = _resp.status if  _resp and status is None else status
+        self.http_ver = _resp.version if _resp else None
+        self.request_info = _resp.request_info if _resp else None
+
+        fingerprint = request.fingerprint
+        self.resp_filter = bool(fingerprint) if  fingerprint != None \
+            else self.spider.settings.FILTER_RESPONSE_TAKE
+        self.fingerprint  = fingerprint if fingerprint != None and \
+            not isinstance(fingerprint,bool) \
+            else self.spider.fingerprint
         self.meta =mdict(request.kwargs_cb)
         self._set_url(url)
 

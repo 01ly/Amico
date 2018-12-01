@@ -4,6 +4,7 @@
     e-mail : yooleak@outlook.com
     date   : 2018-11-15
 '''
+import time
 import logging
 from amico.core.serverthread import SpiderServer
 from amico.core.spiderhub import SpiderHub
@@ -12,8 +13,6 @@ from amico.core.crawler import WebCrawler
 from amico.core.looper import Looper
 from amico.middlewares import MiddleWareManager
 from amico.log import install_root_logger
-import time
-
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,6 @@ class WorkStation(object):
         self.looper = Looper()
         self.spider_hub = SpiderHub(settings,self.crawler)
         install_root_logger(settings)
-        print(logging.root.handlers)
         # self.data_processor = DataProcessor(settings)
         logger.info('start')
 
@@ -69,15 +67,3 @@ class WorkStation(object):
         for i in spiders:
             i.status = 'CLOSED'
             i.conn.close()
-
-def test_hub(_ctrl):
-    while 1:
-        if _ctrl != 'STOP':
-            for i in _ctrl:
-                if isinstance(i,float):continue
-                print(i.name,i.status)
-            _ctrl.append(time.time())
-            time.sleep(4)
-        else:
-            print(_ctrl)
-            return

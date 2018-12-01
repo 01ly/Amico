@@ -1,8 +1,18 @@
 
 
-SPIDER_NAME = '${spider_name}'
+NAME = '${spider_name}'
 
-SPIDER_PATH = r'${spider_path}'
+PATH = r'${spider_path}'
+
+# Spider's BloomFilter arguments
+# ERROR_RATE is necessary
+BLOOMFILTER_ERROR_RATE = 0.00001
+# only one of the arguments below is necessary.
+# while one is set but not None,another one
+# must be None.
+BLOOMFILTER_BIT_SIZE = None
+BLOOMFILTER_ELEMENT_NUM = 10**8
+
 
 CONCURRENCY = 64
 
@@ -21,7 +31,10 @@ MIDDLEWARE_TO_INSTALL = {
     'response':
     {
         # 'amico.middlewares.responsewares.decode':1000,
-
+    },
+    'both':
+    {
+        'amico.middlewares.CrawlFilter' : 900,
     }
 }
 

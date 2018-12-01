@@ -4,6 +4,7 @@
     e-mail : yooleak@outlook.com
     date   : 2018-11-15
 '''
+import asyncio
 import time
 import re as _re
 import w3lib.url as urltool
@@ -20,9 +21,15 @@ class BaseSpider(object):
     blacklist = []
     rules = []
     _start_at = time.ctime()
+    _pause_at = None
+    _resume_at = None
+    _stop_at = None
     _success = 0
     _fail = 0
     _exc = 0
+    urlfilter = None
+    respfilter = None
+    _hanged = set()
 
     def parse(self,response):
         '''Callback function to handle the success response'''
@@ -36,8 +43,13 @@ class BaseSpider(object):
         '''Callback function to handle the exception of response'''
         req = response.request
         exc = response.exception
-        print(f'*[Exception:{self.name}] {exc.__class__.__name__} '
+        print(f'*[Exception:{self.name}] {exc.__class__.__name__}({exc}) '
               f'at:{req.method} - {req.url}')
+
+
+    def fingerprint(self,response):
+        '''indicate the base filter content to differ website pages'''
+        return Fingerprint(None)
 
     def send(self,request):
         '''Send a Request to the binding SpiderHub'''
@@ -89,7 +101,8 @@ class Url(object):
     def __init__(self,url=None,re=None,domain=None,
                  path=None,params=None,query=None,
                  fragment=None,callback=None,
-                 unmatch=None,drop=False):
+                 unmatch=None,drop=False,
+                 filter=None,fingerprint=None):
         self._url = url
         self.path = path
         self.params = params
@@ -100,6 +113,8 @@ class Url(object):
         self.drop = drop
         self.cb = callback
         self.unmatch = unmatch
+        self.filter = filter
+        self.fingerprint = fingerprint
 
     @property
     def url(self):
@@ -186,7 +201,16 @@ class Middleware(object):
     '''identifies the middlewares'''
 
     def process_request(self,request):
-        pass
+        return request
 
     def process_response(self,response):
-        pass
+        return response
+
+
+class Fingerprint(object):
+
+    def __init__(self,text,precise=False):
+        self.text = text
+        self.precise = precise
+
+

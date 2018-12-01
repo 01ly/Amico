@@ -7,7 +7,6 @@
 import os
 import sys
 import six
-import signal
 import optparse
 from inspect import isclass
 from amico.config import Settings
@@ -90,7 +89,8 @@ def _print_commands(settings, inproject,cmds):
     for cmdname, cmd in sorted(cmds.items()):
         print("  %-13s %s" % (cmdname, cmd.short_desc()))
     if not inproject:
-        print("\n  [ more ]    More commands available when run from project directory")
+        print("\n  [ more ]    More commands available "
+              "when run from project directory")
     print('\nUse "amico <command> -h" to see more info about a command')
 
 def _print_unknown_command(settings, cmdname, inproject):
@@ -137,4 +137,3 @@ def _execute(cmd,settings,opts, argvs):
     except CommandUsageError as e:
         print('Tip:wrong usage of command "%s".Correct usage e.g.\n'%e.cmd.name)
         e.parser.print_help()
-

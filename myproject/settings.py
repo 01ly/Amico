@@ -25,7 +25,6 @@ LOG_FORMAT = {
     'CRITICAL'  : '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 }
 
-REQUESTS_SEND_ONCE = 500
 
 SPIDER_SERVER_HOST = '127.0.0.1'
 SPIDER_SERVER_PORT = 2232
