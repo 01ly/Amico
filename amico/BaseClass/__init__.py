@@ -4,7 +4,6 @@
     e-mail : yooleak@outlook.com
     date   : 2018-11-15
 '''
-import asyncio
 import time
 import re as _re
 import w3lib.url as urltool
@@ -46,7 +45,6 @@ class BaseSpider(object):
         print(f'*[Exception:{self.name}] {exc.__class__.__name__}({exc}) '
               f'at:{req.method} - {req.url}')
 
-
     def fingerprint(self,response):
         '''indicate the base filter content to differ website pages'''
         return Fingerprint(None)
@@ -55,9 +53,12 @@ class BaseSpider(object):
         '''Send a Request to the binding SpiderHub'''
         raise NotImplementedError
 
-    async def _generate_seed_requests(self):
+    def start_requests(self):
         '''Generate the starting Requests for the spider.'''
         raise NotImplementedError
+
+    def __gt__(self, other):
+        return self.priority < other.priority
 
 
 class Hub(object):

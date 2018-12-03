@@ -9,6 +9,7 @@ import traceback
 import warnings
 from collections import defaultdict
 from amico.util.load import walk_modules,iter_spider_classes,load_py
+from amico.log import getLogger
 
 class SpiderLoader(object):
 
@@ -18,6 +19,7 @@ class SpiderLoader(object):
         self.project_path = settings['project'].PROJECT_NAME
         self._found=defaultdict(list)
         self.warn_only = True
+        self.logger = getLogger(__name__)
 
     @property
     def spiders(self):
@@ -66,6 +68,7 @@ class SpiderLoader(object):
             spcls.settings = self._load_spider_settings(
                 '.'.join([spcls.__path,'settings']))
             self._spiders[spcls.name] = spcls
+            self.logger.debug(f'Loaded spider "{spcls.__name__}:{spcls.name}"')
 
     def load_all_spiders(self):
         try:

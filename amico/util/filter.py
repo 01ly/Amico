@@ -3,7 +3,8 @@ from bloompy import SCBloomFilter
 
 def _generate_filter(settings):
     error_rate = settings.BLOOMFILTER_ERROR_RATE
-    return SCBloomFilter(error_rate,mode=1)
+    capacity = settings.BLOOMFILTER_INITIAL_CAPACITY
+    return SCBloomFilter(error_rate,initial_capacity=capacity,mode=1)
 
 def _to_feature(request):
     url =request.url

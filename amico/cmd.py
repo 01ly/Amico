@@ -12,6 +12,7 @@ from inspect import isclass
 from amico.config import Settings
 from amico.BaseClass import Command
 from amico.util.load import load_py,walk_modules
+from amico.log import install_logger
 
 APSMP = 'AMICO_PROJECT_SETTINGS_PATH'
 
@@ -55,7 +56,7 @@ def _init_project(setPath=False):
         cwd_module = cwd.split(os.sep)[-1]
         setting_module = '.'.join([cwd_module, 'settings'])
         try:
-            sys.path.append(cwd[:cwd.rindex(os.sep)])
+            sys.path.append(cwd[:cwd.rindex(os.sep)]+os.sep)
             _m = load_py(setting_module)
             if getattr(_m, 'PROJECT_NAME'):
                 os.environ[APSMP] = setting_module
@@ -111,6 +112,7 @@ def run(args=None,settings=None):
         args = sys.argv
     if settings is None or not isinstance(settings,Settings):
         settings = _get_project_settings()
+    install_logger(settings)
     inproject = in_project()
     cmds = _get_all_commands(settings,inproject)
     cmdname = _pop_command_name(args)
@@ -137,3 +139,4 @@ def _execute(cmd,settings,opts, argvs):
     except CommandUsageError as e:
         print('Tip:wrong usage of command "%s".Correct usage e.g.\n'%e.cmd.name)
         e.parser.print_help()
+

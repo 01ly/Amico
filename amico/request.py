@@ -66,9 +66,10 @@ class Request(object):
         self.data = data
         self.params = params
         self.fingerprint = fingerprint
+        self.headers = headers
         self._ignore = False
         self.filter  = bool(filter) if filter != None \
-            else spider.settings.FILTER_URL_TAKE
+            else spider.settings.BLOOMFILTER_URL_ON
         self.kwargs_cb = {} if not kwargs_cb \
             else kwargs_cb
         self.down_type = down_type if down_type\
@@ -119,3 +120,6 @@ class Request(object):
     def __str__(self):
         return '<Request obj at %s [ spider=%s url=%s ] >'\
                %(hex(id(self)),self.spider.name,self.url)
+
+    def __gt__(self, other):
+        return self.priority < other.priority

@@ -27,7 +27,13 @@ MIDDLEWARE_TO_INSTALL = {
 REQUEST_DELAY = 2
 REQUEST_RETRY = 0
 REQUEST_TIMEOUT = 15
-USER_AGENT = ''
+
 
 AUTH_USERNAME = ''
 AUTH_PASSWORD = ''
+
+REQUEST_HEADERS = {
+    'User-agent':'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
+}
+
+

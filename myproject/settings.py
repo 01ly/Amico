@@ -6,7 +6,7 @@ PROJECT_NAME  = 'myproject'
 PATH = r'D:\CODE\Amico\myproject'
 
 #The max nums of the concurrent running tasks at one time in the project
-CONCURRENCY = 300
+CONCURRENCY = 1000
 
 CRAWLING_REQUESTER_MODULE = 'amico.crawl.requester'
 
@@ -15,17 +15,45 @@ CRAWLING_REQUESTER_MODULE = 'amico.crawl.requester'
 #the native one will be replaced.
 COMMANDS_NEW_MODULE = ''
 
-CO_REQUEST_HEADER = {}
-
+LOG_ENABLE = True
+LOG_LEVEL = 'INFO'
+LOG_FILE_ENCODING = 'UTF-8'
+LOG_FILE_SAVE_PATH = r'D:\CODE\Amico\myproject\log.log'
+LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_FORMAT = {
-    'DEBUG'     : '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    'INFO'      : '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    'WARNING'   : '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    'ERROR'     : '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    'CRITICAL'  : '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    'DEBUG'     : '%(asctime)s %(name)s(%(levelname)s) - %(message)s',
+    'INFO'      : '%(asctime)s %(name)s(%(levelname)s) - %(message)s',
+    'WARNING'   : '%(asctime)s %(name)s(%(levelname)s) - %(message)s',
+    'ERROR'     : '%(asctime)s %(name)s(%(levelname)s) - %(message)s',
+    'CRITICAL'  : '%(asctime)s %(name)s(%(levelname)s) - %(message)s',
 }
 
+MIDDLEWARE_COMMON_INSTALL = {
+'request':
+    {
+        'amico.middlewares.requestwares.ListHandle'     : 1000,
+        'amico.middlewares.requestwares.Rules'          : 1000,
+        'amico.middlewares.requestwares.ServerCtrl'     : 700,
+        'amico.middlewares.requestwares.HeadersHandle'  : 890,
+        #place your custom common request handling middleware here
+        #e.g. <middleware module path>:<priority>
+    },
+    'response':
+    {
+        # place your custom common response handling middleware here
+        # e.g. <middleware module path>:<priority>
+    },
+    'both':
+    {
+        'amico.middlewares.CrawlFilter' : 900,
+        # place your custom common middleware(both on request and response) here
+        # e.g. <middleware module path>:<priority>
+    }
+}
 
+PROJECT_REQUESTS_QUEUE = 'amico.datatype.queue.Priority'
+
+SPIDER_SERVER_ENABLE = False
 SPIDER_SERVER_HOST = '127.0.0.1'
 SPIDER_SERVER_PORT = 2232
 
@@ -35,5 +63,4 @@ SPIDER_MODULE = 'spiders'
 
 SPIDER_SERVER_COMMANDS_MODULE = 'amico.subcmd'
 
-SPIDERHUB_REQUESTS_QUEUE = 'amico.datatype.queue.FIFOQueue'
 

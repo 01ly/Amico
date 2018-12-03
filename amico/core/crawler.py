@@ -8,6 +8,7 @@ import asyncio
 from amico.BaseClass import Crawler,CrawlRequester
 from amico.cmd import _iter_specify_classes
 from amico.middlewares import MiddleWareManager
+from amico.log import getLogger
 
 class WebCrawler(Crawler):
 
@@ -22,7 +23,9 @@ class WebCrawler(Crawler):
     def __init__(self,settings):
         super(WebCrawler,self).__init__()
         self.settings = settings
-        self.semaphore = asyncio.Semaphore(self.settings['project'].CONCURRENCY)
+        self.logger = getLogger(__name__)
+        self.semaphore = asyncio.Semaphore(
+            self.settings['project'].CONCURRENCY)
         self._install_requester()
 
     def _install_requester(self):
@@ -31,15 +34,21 @@ class WebCrawler(Crawler):
         for cls in _iter_specify_classes(_module,CrawlRequester):
             cls._crawler = self
             _cls[cls._down_type]=cls()
+            self.logger.debug(f'Installed requester "{cls.__name__}".')
         self.requesters = _cls
 
     @MiddleWareManager.handle_req
     def convert(self,requests):
+        self.logger.info(f'Received {len(requests)} Requests.')
+        tasks = []
         for req in requests:
             coro = self.requesters[req.down_type].crawl(req)
             task = asyncio.ensure_future(coro)
             task.add_done_callback(req.delegate_func)
-            self.tasks.append(task)
+            tasks.append(task)
+        self.tasks.extend(tasks)
+        self.logger.info(f'Converted {len(tasks)} Tasks.')
+        return tasks
 
     @property
     def runing_tasks(self):

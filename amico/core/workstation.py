@@ -5,16 +5,16 @@
     date   : 2018-11-15
 '''
 import time
-import logging
 from amico.core.serverthread import SpiderServer
 from amico.core.spiderhub import SpiderHub
 from amico.core.loader import SpiderLoader
 from amico.core.crawler import WebCrawler
 from amico.core.looper import Looper
+from amico.core.scheduler import Scheduler
 from amico.middlewares import MiddleWareManager
-from amico.log import install_root_logger
+from amico.log import getLogger
 
-logger = logging.getLogger(__name__)
+logger = getLogger(__name__)
 
 class WorkStation(object):
 
@@ -22,13 +22,11 @@ class WorkStation(object):
         self.settings = settings
         self.spider_loader = SpiderLoader(settings)
         self.spiders = self.spider_loader.load_all_spiders()
-        self.mw_manager = MiddleWareManager(self.spiders)
         self.crawler = WebCrawler(settings)
+        self.scheduler = Scheduler(settings)
         self.looper = Looper()
         self.spider_hub = SpiderHub(settings,self.crawler)
-        install_root_logger(settings)
         # self.data_processor = DataProcessor(settings)
-        logger.info('start')
 
     def _print_tips(self,got=True):
         print(f'* Amico - project : {self.settings["project"].PROJECT_NAME}')
@@ -41,9 +39,11 @@ class WorkStation(object):
             print('>> amico cspider myspider\n')
             print('* Then you will see a directory named "myspider" ')
             print(f'* under the "spiders" folder of the project "{self.settings["project"].PROJECT_NAME}".')
-            print('* What you need to do is edit the spider.py to perform as you want.')
+            print('* What you need to do is "edit the spider.py" as you want.')
+            self._close()
 
     def work(self,excludes=None,spider_names=None):
+        logger.debug('Workstation running.')
         if excludes:
             spiders = [i for i in self.spiders if i.name not in excludes]
         elif spider_names:
@@ -55,15 +55,25 @@ class WorkStation(object):
             return
         else:
             self._print_tips()
-            self.server = SpiderServer(self.settings,spiders)
-            self.server.start()
+            self.mw_manager = MiddleWareManager(self.settings, spiders)
+            if self.settings['project'].SPIDER_SERVER_ENABLE:
+                self.server = SpiderServer(self.settings,spiders)
+                self.server.start()
+                logger.debug('SpiderServer started.')
+            else:
+                print('* Press Ctrl+C to stop the crawling.\n')
         self.spider_hub.takeover(spiders)
-        exported_req = self.spider_hub._gen_start_requests(looper=self.looper)
-        self.crawler.convert(exported_req)
-        self.looper.run_forever()
-        self._close(spiders)
+        self.spider_hub.start()
+        while 1:
+            try:
+                self.scheduler.receive(self.spider_hub.requests)
+                tasks = self.crawler.convert(self.scheduler.export())
+                self.looper.run_tasks(tasks)
+            except (StopAsyncIteration,KeyboardInterrupt):
+                break
+        self._close()
+        logger.info('Amico had been shut down.')
 
-    def _close(self,spiders):
-        for i in spiders:
-            i.status = 'CLOSED'
-            i.conn.close()
+    def _close(self):
+        for i in self.spiders:
+            i.close()

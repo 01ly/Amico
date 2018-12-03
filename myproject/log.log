@@ -1,0 +1,22 @@
+2018-12-03 21:02:00 amico.core.loader(DEBUG) - Loaded spider "TTspider:linkin"
+2018-12-03 21:02:00 amico.spider(DEBUG) - Loaded [linkin] urlfilter,count:0,capacity:0,error rate:0.0001
+2018-12-03 21:02:00 amico.spider(DEBUG) - Loaded [linkin] cookie jar.
+2018-12-03 21:02:00 amico.core.crawler(DEBUG) - Installed requester "CommonRequester".
+2018-12-03 21:02:00 amico.core.scheduler(DEBUG) - Loaded scheduler.
+2018-12-03 21:02:00 amico.core.spiderhub(DEBUG) - Loaded Requests Queue:Priority
+2018-12-03 21:02:00 amico.core.workstation(DEBUG) - Workstation running.
+2018-12-03 21:02:00 amico.middlewares(DEBUG) - Loaded middleware [linkin] "UrlListHandleMiddleware".
+2018-12-03 21:02:00 amico.middlewares(DEBUG) - Loaded middleware [linkin] "RulesHandleMiddleware".
+2018-12-03 21:02:00 amico.middlewares(DEBUG) - Loaded middleware [linkin] "CrawlFilterMiddleware".
+2018-12-03 21:02:00 amico.middlewares(DEBUG) - Loaded middleware [linkin] "HeadersMiddleware".
+2018-12-03 21:02:00 amico.middlewares(DEBUG) - Loaded middleware [linkin] "ServerCtrlMiddleware".
+2018-12-03 21:02:00 amico.middlewares(DEBUG) - Loaded middleware [linkin] "CrawlFilterMiddleware".
+2018-12-03 21:02:00 amico.core.spiderhub(DEBUG) - Takeover:['linkin:TTspider']
+2018-12-03 21:02:00 amico.core.spiderhub(INFO) - Got 1 start-requests.
+2018-12-03 21:02:00 amico.core.scheduler(INFO) - Requests Queue Size:1
+2018-12-03 21:02:00 amico.core.scheduler(INFO) - Left Requests:0
+2018-12-03 21:02:00 amico.core.scheduler(INFO) - Exported 1 Requests.
+2018-12-03 21:02:00 amico.middlewares(DEBUG) - Before Middleware handling:1 Requests.
+2018-12-03 21:02:00 amico.middlewares(DEBUG) - After Middleware handling:1 Requests.
+2018-12-03 21:02:00 amico.core.crawler(INFO) - Received 1 Requests.
+2018-12-03 21:02:00 amico.core.crawler(INFO) - Converted 1 Tasks.

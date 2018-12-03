@@ -13,7 +13,6 @@ class Settings(dict):
         super(Settings,self).__init__()
         self['project'] = type('project_settings',(),{})
 
-
     def set_module(self,path,level='project'):
         _module = load_py(path)
         self[level] = _module
@@ -22,8 +21,7 @@ class Settings(dict):
         try:
             return getattr(self[level],name)
         except Exception as e:
-            import warnings
-            warnings.warn('No attribute "%s" in settings "%s" '%(name,self[level]))
+            raise AttributeError('No attribute "%s" in settings "%s" '%(name,self[level]))
 
 
 

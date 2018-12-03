@@ -12,10 +12,11 @@ class CommonRequester(CrawlRequester):
         delay = request.delay
         session = spider.session
         timeout = request.timeout
+        headers = request.headers
         try:
             async with self._crawler.semaphore:
                 try:
-                    async with session.get(url,timeout=timeout) as resp:
+                    async with session.get(url,headers=headers,timeout=timeout) as resp:
                         res = await resp.read()
                 except Exception as e:
                     return Response(url, status=-1, request=request, exc=e.__class__())

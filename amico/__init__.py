@@ -12,3 +12,4 @@ if sys.version_info < (3, 5):
     print("Amico requires Python 3.5.x or later version. " )
     sys.exit(1)
 del sys
+

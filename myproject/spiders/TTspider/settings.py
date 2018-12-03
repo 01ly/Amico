@@ -1,8 +1,8 @@
 
 
-NAME = '${spider_name}'
+NAME = 'linkin'
 
-PATH = r'${spider_path}'
+PATH = r'D:\CODE\Amico\mypro\spiders\TTspider'
 
 # The filter error rate
 BLOOMFILTER_ERROR_RATE = 0.0001
@@ -13,10 +13,10 @@ BLOOMFILTER_URL_ON = True
 BLOOMFILTER_HTML_ON = False
 
 BLOOMFILTER_URL_LOAD_PATH = r''
-BLOOMFILTER_URL_SAVE_PATH = r'${spider_path}\url_record.info'
+BLOOMFILTER_URL_SAVE_PATH = r'D:\\url_record.info'
 
 BLOOMFILTER_HTML_LOAD_PATH = r''
-BLOOMFILTER_HTML_SAVE_PATH = r'${spider_path}\site_record.info'
+BLOOMFILTER_HTML_SAVE_PATH = r'D:\\site_record.info'
 
 CONCURRENCY = 60
 
@@ -38,7 +38,7 @@ MIDDLEWARE_TO_INSTALL = {
     }
 }
 
-REQUEST_DELAY = 3
+REQUEST_DELAY = 5
 
 REQUEST_TIMEOUT = 30
 
@@ -54,5 +54,6 @@ DEFAULT_DOWNLOAD_TYPE = 'text/pic'
 SPIDER_COOKIES_UNSAFE_MODE = False
 SPIDER_COOKIES_FOR_HEADERS = ''
 SPIDER_COOKIES_CUSTOM ={}
-SPIDER_COOKIES_LOAD_PATH =  r'${spider_path}\cookies.info'
-SPIDER_COOKIES_SAVE_PATH =  r'${spider_path}\cookies.info'
+SPIDER_COOKIES_LOAD_PATH =  r'D:\cookies.info'
+SPIDER_COOKIES_SAVE_PATH =  r'D:\cookies.info'
+

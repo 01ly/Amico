@@ -45,7 +45,6 @@ class Response(object):
                 raise TypeError('Not an valid Exception for Response,got "%s".'
                                 % type(exc).__name__)
 
-        self.cookies = cookies
         self.request = request
         self.spider = request.spider
         self.callback = request.callback
@@ -61,14 +60,15 @@ class Response(object):
         self.content_type = _resp.content_type if _resp else None
         self.history = _resp.history if _resp else None
         self.encoding = _resp.charset  if _resp else encoding
-        self._cookies = _resp.cookies if _resp else None
+        self.__cookies = _resp.cookies if _resp else None
         self.status = _resp.status if  _resp and status is None else status
         self.http_ver = _resp.version if _resp else None
         self.request_info = _resp.request_info if _resp else None
+        self.cookies = cookies if cookies else self.__cookies
 
         fingerprint = request.fingerprint
         self.resp_filter = bool(fingerprint) if  fingerprint != None \
-            else self.spider.settings.FILTER_RESPONSE_TAKE
+            else self.spider.settings.BLOOMFILTER_HTML_ON
         self.fingerprint  = fingerprint if fingerprint != None and \
             not isinstance(fingerprint,bool) \
             else self.spider.fingerprint

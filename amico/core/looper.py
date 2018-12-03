@@ -7,10 +7,12 @@
 
 import asyncio
 from inspect import iscoroutine
+from amico.log import getLogger
 
 class Looper(object):
     def __init__(self):
         self.loop = asyncio.get_event_loop()
+        self.logger = getLogger(__name__)
 
     def run_coroutine(self,coroutines):
         if isinstance(coroutines,list):
@@ -31,11 +33,28 @@ class Looper(object):
         try:
             self.loop.run_forever()
         except KeyboardInterrupt:
-            tasks = asyncio.Task.all_tasks(loop=self.loop)
-            group = asyncio.gather(*tasks, return_exceptions=True)
-            group.cancel()
-            self.loop.stop()
-            print('\n* Shutting down Amico.')
+            self.stop()
+
+    def run_tasks(self,tasks):
+        if tasks is None:
+            return
+        try:
+            self.loop.run_until_complete(asyncio.gather(*tasks))
+        except KeyboardInterrupt:
+            self.logger.info('Shutting  down Amico.')
+            self.stop()
+            raise StopAsyncIteration
+
+    def stop(self):
+        tasks = asyncio.Task.all_tasks(loop=self.loop)
+        group = asyncio.gather(*tasks, return_exceptions=True)
+        group.cancel()
+        self.loop.stop()
+        self.logger.debug(f'Gathered {len(tasks)} Tasks.')
+        self.logger.debug(f'Task Group {group} has been canceled')
+        self.logger.debug('Stopped looper.')
+
+
 
 
 

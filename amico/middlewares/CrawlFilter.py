@@ -20,8 +20,8 @@ class CrawlFilterMiddleware(Middleware):
         _feature = _to_feature(request)
         if _feature in _filter:
             raise DropRequest
-        # else:
-        #     _filter.add(_feature)
+        else:
+            _filter.add(_feature)
         return request
 
     def _rules_effect(self,url,spider,mode=0):
@@ -43,7 +43,6 @@ class CrawlFilterMiddleware(Middleware):
     def process_response(self,response):
         url = response.url
         spider = response.spider
-        spider.urlfilter.add(_to_feature(response.request))
         _flag = self._rules_effect(url,spider,1)
         if _flag is None:
             if not response.resp_filter:

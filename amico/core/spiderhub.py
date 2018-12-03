@@ -5,12 +5,11 @@
     date   : 2018-11-15
 '''
 import amico
-import logging
 from amico.BaseClass import Hub
 from amico.middlewares import MiddleWareManager
 from amico.util.filter import _to_feature
-
-logger = logging.getLogger('amico')
+from amico.util.load import load_py
+from amico.log import getLogger
 
 class SpiderHub(Hub):
 
@@ -27,24 +26,26 @@ class SpiderHub(Hub):
         self._exception_counter = 0
         self.active = False
         self._crawler = crawler
+        self.logger = getLogger(__name__)
+        self._set_queue()
 
-    def _gen_start_requests(self,looper):
-        self.looper = looper
-        coroutines = [i._generate_seed_requests() for i in self.spiders]
-        requests = looper.run_coroutine(coroutines)
-        if any(i for i in requests):
-            _res = []
-            [_res.extend(i) for i in requests]
-            self.active = True
-            return _res
-        else:
-            import sys
-            print('*[End] No seed urls to start the spiders.')
-            sys.exit(0)
+    def _set_queue(self):
+        _queue = self.settings.gets('PROJECT_REQUESTS_QUEUE')
+        self.requests = load_py(_queue)()
+        self.logger.debug(f'Loaded Requests Queue:{type(self.requests).__name__}')
+
+    def start(self):
+        self.active = True
+        for i in self.spiders:
+            for seed in i.start_requests():
+                i.status = 'RUNNING'
+                if isinstance(seed,amico.Request):
+                    self.requests.put_nowait(seed)
+        self.logger.info(f'Got {self.requests.qsize()} start-requests.')
 
     def takeover(self,spiders):
         self.spiders =spiders
-        logger.info('Take:%s'%spiders)
+        self.logger.debug(f'Takeover:{[i.name+":"+i.__class__.__name__ for i in spiders]}')
         self._binding()
 
     def accept(self,request):
@@ -62,22 +63,30 @@ class SpiderHub(Hub):
     @MiddleWareManager.handle_resp
     def delegate(self,response):
         _res = []
+        req = response.request
+        spider = response.spider
         if response.status == 200:
             self._success_counter += 1
-            response.spider._success += 1
+            spider._success += 1
+            self.logger.info(f'[Success]{spider.name} {req.method}-{req.url}')
             a = self.accept(response.callback(response))
         elif response.status == -1:
             self._exception_counter += 1
-            response.spider._exc +=1
-            response.spider.urlfilter.delete(_to_feature(response.request))
+            spider._exc +=1
+            self.logger.info(f'[{response.exception.__class__.__name__}] {spider.name}'
+                             f' {req.method}-{req.url} ')
+            if spider.urlfilter:
+                spider.urlfilter.delete(_to_feature(req))
             a = self.accept(response.excback(response))
         else:
             self._failed_counter += 1
-            response.spider._fail += 1
-            response.spider.urlfilter.delete(_to_feature(response.request))
+            spider._fail += 1
+            self.logger.info(f'[Error {response.status}]{spider.name} {req.method}-{req.url}')
+            if spider.urlfilter:
+                spider.urlfilter.delete(_to_feature(req))
             a = self.accept(response.errback(response))
         _res.extend(a)
-        self._crawler.convert(_res)
+        [self.requests.put_nowait(i) for i in _res if i]
 
     def __str__(self):
         return f'<SpiderHub obj at {hex(id(self))} active:{self.active}' \

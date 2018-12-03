@@ -6,10 +6,11 @@ from amico import Url,Request,send
 from bs4 import BeautifulSoup as bs
 
 class TTspider(amico.Spider):
-	urls = ['https://www.csdn.net/',]
+
 	name = 'linkin'
+	urls = ['https://www.csdn.net/',]
 	whitelist = [
-		Url(re='http.*csdn.net.*'),
+		Url(re='http.*.csdn.net.*'),
 	]
 	# rules = [
 	# 	Url(domain='blog.csdn.net',filter=True)
@@ -23,15 +24,15 @@ class TTspider(amico.Spider):
 
 	def parse(self,response):
 		# print(self)
-		print(f'{response.url}: {self._success} {self._fail} {self._exc} '
-			  f'-->{response.spider.urlfilter.count} {len(response.spider.urlfilter)} {response.spider.respfilter.count}<--')
+		# print(f'{response.url}: {self._success} {self._fail} {self._exc} '
+		# 	  f'-->{response.spider.urlfilter.count} {len(response.spider.urlfilter)} {response.spider.respfilter.count}<--')
 		text = response.read()
 		html = bs(text,'lxml')
 		links = html('a')
 		a = 0
 		for i in links:
 			if hasattr(i,'href'):
-				if a>=5:
+				if a>=3:
 					break
 				try:
 					send(Request(self, i['href']))
@@ -41,18 +42,8 @@ class TTspider(amico.Spider):
 
 	def error(self,response):
 		# print(response.url,response.status)
-		pass
+		print('错误的返回码:',response.status)
 
-
-
-
-
-
-		# print(response.read()[:50])
-		# print(response.json())
-		# for i in range(10):
-		# 	self.send(Request(self,'https://blog.csdn.net/wufaliang003/article/details/79794982'))
-		# self.send(response.url)
 
 	# def fingerprint(self,response):
 	# 	return 'ppppp'

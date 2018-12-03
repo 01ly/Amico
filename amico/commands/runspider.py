@@ -1,4 +1,5 @@
 
+import re,string
 from amico.BaseClass import Command
 from amico.exceptions import CommandUsageError
 from amico.core.workstation import WorkStation
@@ -10,12 +11,9 @@ class AnyNameYouWant(Command):
     def handle(self, settings, opts, args):
         if not all(args):
             raise CommandUsageError(self,self.parser)
-        spider_names = args
+        spider_names = [re.sub('[%s ]'%string.punctuation,'',i) for i in args]
         works = WorkStation(settings)
-        # works.work(spider_names=spider_names)
-
-
-
+        works.work(spider_names=spider_names)
 
     @classmethod
     def short_desc(self):

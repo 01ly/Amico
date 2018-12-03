@@ -20,6 +20,7 @@ setup(
     install_requires=[
             'lxml',
             'six>=1.5.2',
+            'bloompy>=0.1.1',
         ],
     classifiers=[
         'Framework :: Amico',

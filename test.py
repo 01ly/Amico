@@ -1,4 +1,5 @@
 import os
 from amico.cmd import run
 os.chdir('myproject')
-run(['amico','runproject'])
+# print(os.getcwd())
+run(['amico','runproject',])
