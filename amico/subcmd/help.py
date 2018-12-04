@@ -14,6 +14,8 @@ class SCommand(SpiderClientCommand):
         \r\n       echo                 echo a running spider and its attributes.
         \r\n       pause                pause a running spider by a give name.
         \r\n       stop                 stop a running/paused spider by a give name.
+        \r\n       close                close a spider by a give name.
+        \r\n       restart              restart a stopped spider by a give name.
         \r\n       resume               resume a paused spider by a give name.
         \r\n       quit                 quit the Spider-Client.
         \r\n       help                 show all the available commands usage.

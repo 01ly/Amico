@@ -65,6 +65,8 @@ class MiddleWareManager(object):
     @classmethod
     def _process_response(cls,future):
         response = future.result()
+        if response.request._ignore:
+            return response
         if response.status == 200:
             for i in cls.resp_mw[response.spider.name]:
                 try:
@@ -79,9 +81,9 @@ class MiddleWareManager(object):
     def handle_req(cls,func):
         @wraps(func)
         def wrap(_self,requests,*args,**kwargs):
+            if not any(requests):return None
             _r = []
             cls.logger.debug(f'Before Middleware handling:{len(requests)} Requests.')
-            if not any(requests):return None
             for req in sorted(requests,key=lambda x:-x.priority):
                 if req._ignore:
                     _r.append(req)

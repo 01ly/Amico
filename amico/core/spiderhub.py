@@ -48,6 +48,12 @@ class SpiderHub(Hub):
         self.logger.debug(f'Takeover:{[i.name+":"+i.__class__.__name__ for i in spiders]}')
         self._binding()
 
+    def _binding(self):
+        for spider in self.spiders:
+            spider.binding_hub = self
+            spider.status = 'BOUND'
+            self.priorities += spider.priority
+
     def accept(self,request):
         _all_req = []
         if isinstance(request,list):

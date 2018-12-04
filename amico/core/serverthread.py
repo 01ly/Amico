@@ -35,12 +35,6 @@ class SpiderServer(Thread):
                     return
                 elif msg:
                     resp = self.parse_opt(msg)
-                    if '[resume]' in resp:
-                        _name = resp.split(',')[-1]
-                        for i in self.spiders:
-                            if i.name == _name:
-                                await i.resume()
-                                resp = f'* Spider {i.name} resumed at {i._resume_at} successfully.'
                     print(f'*[Server] {time.ctime()} Received "{msg}" from {_c}.')
                     writer.write(resp.encode('latin-1'))
             except Exception as e:

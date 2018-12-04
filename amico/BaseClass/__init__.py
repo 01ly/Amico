@@ -22,13 +22,16 @@ class BaseSpider(object):
     _start_at = time.ctime()
     _pause_at = None
     _resume_at = None
+    _restart_at = None
     _stop_at = None
+    _close_at = None
     _success = 0
     _fail = 0
     _exc = 0
     urlfilter = None
     respfilter = None
-    _hanged = set()
+    _hanged = []
+    closed = False
 
     def parse(self,response):
         '''Callback function to handle the success response'''
@@ -47,7 +50,7 @@ class BaseSpider(object):
 
     def fingerprint(self,response):
         '''indicate the base filter content to differ website pages'''
-        return Fingerprint(None)
+        return Fingerprint(None,False)
 
     def send(self,request):
         '''Send a Request to the binding SpiderHub'''
@@ -84,11 +87,7 @@ class Hub(object):
 
     def _binding(self):
         '''bind each spider to the hub'''
-        for spider in self.spiders:
-            spider.binding_hub = self
-            spider.status = 'BOUND'
-            self.priorities += spider.priority
-
+        raise NotImplementedError
 
 class Crawler(object):
 
@@ -210,7 +209,7 @@ class Middleware(object):
 
 class Fingerprint(object):
 
-    def __init__(self,text,precise=False):
+    def __init__(self,text,precise=True):
         self.text = text
         self.precise = precise
 

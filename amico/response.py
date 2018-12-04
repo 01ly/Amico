@@ -81,6 +81,8 @@ class Response(object):
 
     def text(self,encoding=None):
         encoding = encoding if encoding else self.encoding
+        if encoding is None:
+            encoding='utf-8'
         if isinstance(self._body,bytes):
             return str(self._body,encoding=encoding)
         return self._body
@@ -94,6 +96,8 @@ class Response(object):
 
     def read(self,encoding=None):
         encoding = encoding if encoding else self.encoding
+        if encoding is None:
+            encoding='utf-8'
         if isinstance(self._body,str):
             return bytes(self._body,encoding=encoding)
         return self._body

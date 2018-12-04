@@ -136,17 +136,26 @@ class Spider(BaseSpider):
                 self.logger.debug(f'Save respfilter of "{self.name}" succeed.')
 
     def close(self,save=True):
-        self.status = 'CLOSED'
+        if self.closed:
+            return
+        self.status = 'CLOSE'
         if save:
             self.save_cookies()
             self.save_records()
         self.conn.close()
+        self.closed = True
 
-    async def resume(self):
-        _resume = []
+    def resume(self):
         self.status = 'RUNNING'
-        if any(self._hanged):
-            _resume.extend(self._hanged)
-        else:
-            _resume.extend([amico.Request(self,url) for url in self.urls])
-        self.binding_hub._crawler.convert(_resume)
+        self.logger.debug(self._hanged)
+        while self._hanged:
+            a = self._hanged.pop(0)
+            if a:
+                self.logger.debug(f'RESUME {self.name} {a}')
+                self.binding_hub.requests.put_nowait(a)
+
+    def restart(self):
+        self.status = 'RUNNING'
+        req = self.start_requests()
+        self.logger.debug(f'RESTART {self.name} {req}')
+        [self.binding_hub.requests.put_nowait(i) for i in req if i]

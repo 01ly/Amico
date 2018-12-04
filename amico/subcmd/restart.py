@@ -7,25 +7,23 @@ class SCommand(SpiderClientCommand):
     def parse(self,cmdname,args,spiders):
         argv = args[0]
         if argv == 'spiders':
-            return '\r\n Not a valid usage of command: resume <spider name>'
+            return '\r\n Not a valid usage of command: restart <spider name>'
         d = {i.name:i for i in spiders}
         if argv in d:
             spider = d[argv]
             if spider.status == 'RUNNING':
-                return f"* Spider {argv} is running,it can not resume. "
-            elif spider.status == 'PAUSE':
+                return f"* Spider {argv} is running,it can not restart. "
+            elif spider.status == 'STOP':
                 lock = threading.Lock()
                 lock.acquire()
-                spider.status = 'RESUME'
-                spider._resume_at = time.ctime()
+                spider.status = 'RESTART'
+                spider._restart_at = time.ctime()
                 lock.release()
-                return f'* Spider {argv} resumed at {spider._resume_at} successfully.'
-            elif spider.status == 'RESUME':
-                return f'* Spider {argv} is resuming.'
+                return f'* Spider {argv} restarted at {spider._restart_at} successfully.'
             elif spider.status == 'CLOSE':
                 return f'* Spider {argv} is closed.'
-            elif spider.status == 'STOP':
-                return f'* Spider {argv} is stopped.Using "restart" command to restart it.'
+            elif spider.status == 'PAUSE':
+                return f'* Spider {argv} is paused.Using "resume" command to resume it.'
             else:
                 return f'* Invalid resuming status "{spider.status}" for a spider.'
         else:

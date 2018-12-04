@@ -122,4 +122,5 @@ class Request(object):
                %(hex(id(self)),self.spider.name,self.url)
 
     def __gt__(self, other):
-        return self.priority < other.priority
+        return self.priority < other.priority and \
+               self.spider > other.spider

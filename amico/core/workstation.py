@@ -66,6 +66,7 @@ class WorkStation(object):
         self.spider_hub.start()
         while 1:
             try:
+                self.scheduler.spiders_monitor(spiders)
                 self.scheduler.receive(self.spider_hub.requests)
                 tasks = self.crawler.convert(self.scheduler.export())
                 self.looper.run_tasks(tasks)
@@ -76,4 +77,5 @@ class WorkStation(object):
 
     def _close(self):
         for i in self.spiders:
-            i.close()
+            if not i.closed:
+                i.close()
