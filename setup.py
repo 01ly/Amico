@@ -2,7 +2,7 @@ from distutils.core import  setup
 from setuptools import find_packages
 
 setup(
-    name='Amipy',
+    name='Amico',
     version='1.0.0',
     url='https://github.com/01ly/Amipy',
     description='A micro asynchronous Python website crawler framework',
@@ -15,7 +15,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     entry_points={
-        'console_scripts': ['amipy = amipy.cmd:run']
+        'console_scripts': ['amico = amico.cmd:run']
     },
     install_requires=[
             'lxml',
