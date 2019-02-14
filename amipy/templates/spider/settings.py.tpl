@@ -39,7 +39,7 @@ DATABASE_SETTINGS = {
     'port':27017,
     'user':'',
     'password':'',
-    'database':'AmicoTestDB',
+    'database':'AmipyTestDB',
 }
 # Proxy mode.
 HTTP_PROXY_ENABLE = False
@@ -88,7 +88,7 @@ REQUEST_HEADERS = {
 # Obey the target website's robots.txt.
 ROBOTS_TXT_OBEY = True
 # The name of your spider bot.
-ROBOTS_USER_AGENT = 'AmicoBot'
+ROBOTS_USER_AGENT = 'AmipyBot'
 # Use unsafe cookies mode.
 SPIDER_COOKIES_UNSAFE_MODE = False
 # Cookies string in the request headers.
