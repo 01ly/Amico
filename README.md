@@ -1,4 +1,4 @@
-# Amico
+# Amipy
  Python微型异步爬虫框架(A micro  asynchronous Python website crawler framework)
 
 > 基于Python 3.5 + 的异步async-await 框架，搭建一个模块化的微型异步爬虫。可以根据需求控制异步队列的长度和延迟时间等。配置了可以去重的布隆过滤器，网页内容正文过滤等，完全自主配置使用。
@@ -11,22 +11,22 @@
 ## 安装
 直接使用pip安装即可:
 ```
-pip install amico
+pip install amipy
 ```
 ## 基础命令
 * 1.查看当前路径下的可用命令，在DOS命令行下输入：
 
-```> amico```
+```> amipy```
 
 会出现命令帮助界面。
 
 * 2.创建一个新的项目，在DOS命令行下输入：
 ```
-> amico cproject myproject
+> amipy cproject myproject
 ```
-会在当前路径下创建一个Amico爬虫项目myproject。如果想要创建在指定目录下，可以加上附加参数,-d,如：
+会在当前路径下创建一个Amipy爬虫项目myproject。如果想要创建在指定目录下，可以加上附加参数,-d,如：
 ```
-> amico cproject myproject -d  D:\somefolder
+> amipy cproject myproject -d  D:\somefolder
 ```
 项目myproject便会在路径**D:\somefolder**下创建。
 项目的目录结构应该如下:
@@ -41,7 +41,7 @@ pip install amico
 > settings.py 为整个项目的配置文件，可以为整个项目下的爬虫安装共有的中间件，控制整个项目的请求并发数，设置日志级别、文件路径等。
 * 3.进入项目路径，创建一个新的爬虫，在DOS命令行下输入:
 ``` 
-> amico cspider myspider
+> amipy cspider myspider
 ```
 此时在项目myproject目录下的spiders文件夹中会创建一个爬虫目录myspider，此时的项目结构为：
 ```text
@@ -70,28 +70,28 @@ pip install amico
 
 * 4.运行项目下的所有爬虫，进入项目路径，在DOS命令行下输入：
 ```text
-> amico runproject
+> amipy runproject
 ```
 则该项目下的所有爬虫会开始运行，如果不想运行某个爬虫，只需要加上参数 -e，如：
 ```text
-> amico runproject -e No1spider No2spider
+> amipy runproject -e No1spider No2spider
 ```
 则名为“No1spider”、“No2spider”的爬虫均不会运行。
 * 5.运行指定的爬虫，进入项目路径，在DOS命令行下输入：
 ```text
-> amico runspider myspider01 
+> amipy runspider myspider01 
 ```
 则名为“myspider01”的爬虫便会被启动。可以加上多个爬虫名称，用空格隔开即可。
 
 * 6.列出当前项目下的所有爬虫信息。在DOS命令行下输入：
 ```text
-> amico list
+> amipy list
 ```
 便会将当前项目下的所有爬虫信息列出。
 
 ## 使用
 
-### Amico爬虫编写流程
+### Amipy爬虫编写流程
 编写自己的爬虫。【假设你已经安装前面"基础命令"创建了一个项目，并且创建了一个爬虫名为myspider】只需要进入myspider文件夹，按照需求修改当前爬虫的配置settings.py 以及数据存储需要用到的表模型item.py编写,编辑文件spider.py，加入爬取规则逻辑等。
 
 
@@ -99,7 +99,7 @@ pip install amico
 Url类对象是一个规则匹配类，它提供了许多种模式的url规则匹配。
 比如：
 ```python
-from amico import Url
+from amipy import Url
 # 表示匹配到正则模式'http://www.170mv.com/song.*'的所有链接
 Url(re='http://www.170mv.com/song.*')
 # 表示匹配到正则模式'http://www.170mv.com/song.*'的所有链接其回调函数为'getmp3'
@@ -139,16 +139,16 @@ blacklist = [
 * exception 请求出现异常，异常自定义处理。
 
 ###  数据存储
-Amico目前只支持MongoDB数据库，默认的数据库设置在爬虫配置文件settings.py中。
+Amipy目前只支持MongoDB数据库，默认的数据库设置在爬虫配置文件settings.py中。
 对于爬取的数据进行保存，默认只使用MongoDB进行数据存储（后续可以自己扩展编写ORM）。只需要打开item.py,修改其中的示例类，原先为：
 ```python
-from amico.BaseClass.orm import Model,Field
+from amipy.BaseClass.orm import Model,Field
 class DataItemName(Model):
     ...
 ```
 修改其内容为：
 ```python
-from amico.BaseClass.orm import Model,Field
+from amipy.BaseClass.orm import Model,Field
 class MyTableName(Model):
     ID = Field('索引')
     content = Field('内容')
@@ -177,13 +177,13 @@ self.item.db.update()
 等api来实现数据库操作。
 
 ### 事件循环loop
-Amico爬虫的异步请求基于python3的协程async框架，所以项目全程只有一个事件循环运行，如果需要添加更多的爬虫请求，可以通过回调函数传进事件循环，加入请求队列。
+Amipy爬虫的异步请求基于python3的协程async框架，所以项目全程只有一个事件循环运行，如果需要添加更多的爬虫请求，可以通过回调函数传进事件循环，加入请求队列。
 具体做法便是通过在爬虫类的回调函数中使用**send**函数来传递请求Request对象：
 ```python
-import amico
-from amico import Request,send
+import amipy
+from amipy import Request,send
 
-class MySpider(amico.Spider):
+class MySpider(amipy.Spider):
     ...
     
     def parse(self,response):
@@ -196,7 +196,7 @@ class MySpider(amico.Spider):
 可以在项目配置文件settings.py中设置整个项目最大的协程并发数CONCURRENCY，以及协程请求的延时等。
 
 ### Telnet连接
-Amico爬虫内置一个服务线程，可以通过Telnet进行连接来查看操作当前项目的爬虫，在启动爬虫后，可以通过新开一个DOS命令窗口，
+Amipy爬虫内置一个服务线程，可以通过Telnet进行连接来查看操作当前项目的爬虫，在启动爬虫后，可以通过新开一个DOS命令窗口，
 输入：
 ```text
 >telnet 127.0.0.1 2232
@@ -217,38 +217,38 @@ Amico爬虫内置一个服务线程，可以通过Telnet进行连接来查看操
 ```
 举例，假设当前爬虫唯一标识名称为lianjia，则可以通过：
 ```text
-$amico> pause lianjia
+$amipy> pause lianjia
 ```
 来暂停爬虫lianjia的爬取进度，在爬虫将当前请求队列清空后会一直暂停，直到收到Telnet端发出的其他命令。恢复爬虫使用：
 ```text
-$amico> resume lianjia
+$amipy> resume lianjia
 ```
 查看当前项目下所有爬虫：
 ```text
-$amico> list
+$amipy> list
 ```
 详细查看则使用：
 ```text
-$amico> show spiders
+$amipy> show spiders
 ```
 开启关闭Telnet在项目的配置文件settings.py中设置SPIDER_SERVER_ENABLE。
 
 ### 例子
-#### 1. **使用Amico创建链家网爬虫（LianJiaSpider）**
+#### 1. **使用Amipy创建链家网爬虫（LianJiaSpider）**
 
 > 爬虫目的：爬取链家网上北京当前最新的租房信息，包含“价格”，“房屋基本信息”、“配套设施”、“房源描述”、“联系经纪人”、“地址和交通”存入MongoDB数据库中
 
  * 创建项目
  
- 进入到D:\LianJia路径，创建Amico项目LJproject：
+ 进入到D:\LianJia路径，创建Amipy项目LJproject：
  ```text
-D:\LianJia> amico cproject LJproject
+D:\LianJia> amipy cproject LJproject
 ```
  * 创建爬虫
  
- 进入到项目路径D:\LianJia\LJproject，创建Amico爬虫lianjia:
+ 进入到项目路径D:\LianJia\LJproject，创建Amipy爬虫lianjia:
  ```text
-D:\LianJia\LJproject> amico cspider lianjia
+D:\LianJia\LJproject> amipy cspider lianjia
 ```
 * 编写数据库模型
 
@@ -256,7 +256,7 @@ D:\LianJia\LJproject> amico cspider lianjia
 ```python
 #coding:utf-8
 
-from amico.BaseClass.orm import Model,Field
+from amipy.BaseClass.orm import Model,Field
 
 class LianJiaRenting(Model):
     price = Field('价格')
@@ -286,11 +286,11 @@ DATABASE_SETTINGS = {
  
  打开 D:\LianJia\LJproject\spiders\Lianjia\spider.py，编写爬虫采集脚本：
  ```python
-import amico,re
-from amico import send,Request,Url
+import amipy,re
+from amipy import send,Request,Url
 from bs4 import BeautifulSoup as bs 
 
-class LianjiaSpider(amico.Spider):
+class LianjiaSpider(amipy.Spider):
 
     name = 'lianjia'
     # 设置爬取初始链接
@@ -354,13 +354,13 @@ class LianjiaSpider(amico.Spider):
 另外，开启网页内容相似过滤**BLOOMFILTER_HTML_ON**可能会使爬取的结果数较少，爬虫只会采集相似度不同的网页内容的链接，
 如果需要大批量采集，而网页正文较少的，可以关闭这个设置。
 
-代码比较粗糙，但可以知道Amico爬虫基本的实现流程。
+代码比较粗糙，但可以知道Amipy爬虫基本的实现流程。
 
 * 运行爬虫
 
 在项目根路径下，输入：
 ```text
-D:\LianJia\LJproject> amico runspider
+D:\LianJia\LJproject> amipy runspider
 ```
 * 查看数据库
 
@@ -411,7 +411,7 @@ D:\LianJia\LJproject> amico runspider
 ```
 进行Telnet连接，可以使用命令操作查看当前爬虫的爬取状态。例如使用echo命令:
 ```text
-$amico> echo lianjia
+$amipy> echo lianjia
 ```
 可以查看当前爬虫的状态：
 ```text
