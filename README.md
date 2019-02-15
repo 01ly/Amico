@@ -63,7 +63,7 @@ pip install amipy
 其中：
 > * 位于myspider文件夹下的settings.py为爬虫myspider的配置文件，该配置只对当前爬虫有效。可以对该爬虫的布隆过滤器进行配置，安装中间件等。
 > * cookies.info 为爬虫的请求cookie保存文件，该爬虫爬过的所有网站的cookie会保存进该文件。可以通过爬虫配置文件settings.py进行路径加载和保存。
-> * site_record.info 为爬虫爬取过的网站的布隆过滤器记录文件，方便下次爬取的时候加载，会把爬取过的网站自动去掉。防止重复爬取。
+> * site_record.info 为爬虫爬取过的网站内容的布隆过滤器记录文件，方便下次爬取的时候加载，会把爬取过相同内容的网站自动去掉。防止重复爬取正文内容相同的网页。
 > * url_record.info 为该爬虫发出的请求url+headers+method+数据的去重后集合，爬虫结束运行时，如果配置保存去重url集合。下次爬取时加载该文件可以自动过滤爬取过的所有url+headers+method+数据。
 > * item.py 为ORM的MongoDB数据集合对象，对应的类属性可以映射到数据库集合中的字段，类名为数据表名。
 > * spider.py 为当前爬虫的主要文件，自己编写爬取逻辑，提取规则和数据保存脚本等。
@@ -233,8 +233,40 @@ $amipy> show spiders
 ```
 开启关闭Telnet在项目的配置文件settings.py中设置SPIDER_SERVER_ENABLE。
 
-### 例子
-#### 1. **使用Amipy创建链家网爬虫（LianJiaSpider）**
+### 爬取去重
+Amipy的爬取去重可以分为两种：
+* url去重
+* 网页内容正文去重
+
+两者皆使用了布隆过滤器去重，对于url去重，则是使用url+method+params+data的方式生成摘要进行布隆过滤器去重。
+对于网页正文去重则是按照配置文件指定的正文检测参数来检测每个网页的正文内容生成摘要存进布隆过滤器，可以在爬虫的配置文件
+settings.py中对以下几项进行配置来检测网页内容正文:
+```text
+# 网页内容剔除掉哪些标签后再识别正文
+BLOOMFILTER_HTML_EXTRACTS = ['script','style','head']
+# 允许一个正文内容块中至多空行数
+BLOOMFILTER_HTML_GAP = 3
+# 连续多少行有正文则认为是一个正文块
+BLOOMFILTER_HTML_THRESHOLD = 5
+# 每一行正文的字密度
+BLOOMFILTER_HTML_DENSITY =45
+```
+上面两种是默认的去重方式，还可以指定请求返回的网页内容的某一部分作为响应指纹来进行针对性的去重。
+如果想要自己指定哪个响应内容部分作为去重的指纹，可以在将请求Request送进协程队列时指定指纹函数，如：
+```python
+    ...
+    def parse(self,response):
+        ...
+        send(Request(self,url,fingerprint=self.fingerprint))
+        ...
+    
+    def fingerprint(self,response):
+        ...
+        # 返回需要作为指纹的文本字符等
+        return something
+```
+## 例子
+### 1. **使用Amipy创建链家网爬虫（LianJiaSpider）**
 
 > 爬虫目的：爬取链家网上北京当前最新的租房信息，包含“价格”，“房屋基本信息”、“配套设施”、“房源描述”、“联系经纪人”、“地址和交通”存入MongoDB数据库中
 
