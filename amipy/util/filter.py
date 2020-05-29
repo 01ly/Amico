@@ -11,7 +11,7 @@ def _to_feature(request):
     method = request.method
     params = '' if not request.params else request.params
     data = '' if not request.data else request.data
-    _str = ''.join([method, url, params, data])
+    _str = ''.join([method, url, str(params), str(data)])
     _feature = _to_md5(_str)
     return _feature
 
